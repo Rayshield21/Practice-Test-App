@@ -13,6 +13,11 @@ function populateAnswersArray(answer, pagination) {
     answersArray.push(answer);
   }
 }
+
+function changeNextButton() {
+  next.innerHTML = `Done <i class="material-icons right">send</i>`;
+  next.classList.remove('next');
+}
 function validateRadio() {
   radioName = getElement(`input[type="radio"]`).getAttribute('name');
   radioChecked = getElement(`input[name= "${radioName}"]:checked`);
@@ -38,19 +43,22 @@ function flushQContainer(element) {
 }
 
 function paginationCheck(p) {
-  if (p == 0) {
-    previous.style.pointerEvents = 'none';
-  } else {
-    previous.style.pointerEvents = 'auto';
-    previous.classList.remove('disabled');
+  // if (p == 0) {
+  //   previous.style.pointerEvents = 'none';
+  // } else {
+  //   previous.style.pointerEvents = 'auto';
+  //   previous.classList.remove('disabled');
+  // }
+  if (pagination == randomizedQArray.length - 1) {
+    return true;
+    // next.style.pointerEvents = 'none';
+    // next.classList.add('disabled');
   }
-  if (p >= randomizedQArray.length - 1) {
-    next.style.pointerEvents = 'none';
-    next.classList.add('disabled');
-  } else {
-    next.style.pointerEvents = 'auto';
-    next.classList.remove('disabled');
-  }
+  return false;
+  // else {
+  //   next.style.pointerEvents = 'auto';
+  //   next.classList.remove('disabled');
+  // }
 }
 
 function populateQContainer(element, pagination) {
@@ -77,7 +85,7 @@ function populateQContainer(element, pagination) {
   if (pagination > currentMax) {
     currentMax = pagination;
     currentProgress = (currentMax + 1) * progressScale;
-    numBox.setAttribute('max', currentMax + 1);
+    // numBox.setAttribute('max', currentMax + 1);
     determinate.style.width = `${currentProgress}%`;
   }
 }
@@ -115,13 +123,15 @@ function getElements(s) {
   return document.querySelectorAll(s);
 }
 const questionContainer = getElement('.questions');
-const previous = getElement('.previous');
+// const previous = getElement('.previous');
 const next = getElement('.next');
-const form = getElement('form');
-const numBox = getElement('.numBox');
-const done = getElement('.done');
+const buttonContainer = getElement('.buttonContainer');
+// const form = getElement('form');
+// const numBox = getElement('.numBox');
+// const done = getElement('.done');
 const modalMsg = getElement('.modalMsg');
 const determinate = getElement('.determinate');
+const modal = getElement('.modal');
 
 // question keys
 var questionsArray = generateQuestions(questionAnswerData);
@@ -158,67 +168,88 @@ next.addEventListener('click', (e) => {
     pagination += 1;
     flushQContainer(questionContainer);
     populateQContainer(questionContainer, pagination);
-    paginationCheck(pagination);
-    if (e.target.classList.contains('disabled')) {
-      var radios = getElements(`input[name="question"]`);
-      console.log(radios);
-      radios.forEach((radio) => {
-        radio.addEventListener('click', (re) => {
-          if (re.target.checked) {
-            done.classList.remove('disabled');
-            done.classList.add(
-              'btn-large',
-              'waves-effect',
-              'waves-light',
-              'pulse'
-            );
-            done.innerHTML = `Done <i class="material-icons right">send</i>`;
-          }
-        });
+    var finalQuestion = paginationCheck(pagination);
+    if (finalQuestion) {
+      var newButton = document.createElement('button');
+      newButton.classList.add('btn', 'modal-trigger');
+      newButton.setAttribute('type', 'submit');
+      newButton.setAttribute('data-target', 'modal1');
+      newButton.innerHTML = `Done <i class="material-icons right">send</i>`;
+      newButton.addEventListener('click', () => {
+        var answer = validateRadio();
+        if (answer) {
+          M.Modal.init(modal, {
+            dismissible: false,
+          });
+        } else {
+          alert('answer');
+        }
       });
+      buttonContainer.appendChild(newButton);
+      buttonContainer.removeChild(next);
     }
   } else {
     alert('Answer');
   }
+  //   if (e.target.classList.contains('disabled')) {
+  //     var radios = getElements(`input[name="question"]`);
+  //     console.log(radios);
+  //     radios.forEach((radio) => {
+  //       radio.addEventListener('click', (re) => {
+  //         if (re.target.checked) {
+  //           done.classList.remove('disabled');
+  //           done.classList.add(
+  //             'btn-large',
+  //             'waves-effect',
+  //             'waves-light',
+  //             'pulse'
+  //           );
+  //           done.innerHTML = `Done <i class="material-icons right">send</i>`;
+  //         }
+  //       });
+  //     });
+  //   }
 });
 
-form.addEventListener('submit', (e) => {
-  var answer = validateRadio();
-  if (answer) {
-    populateAnswersArray(answer, pagination);
-    pagination = numBox.value - 1;
-    flushQContainer(questionContainer);
-    populateQContainer(questionContainer, pagination);
-    paginationCheck(pagination);
-  } else {
-    alert('Answer');
-  }
-  e.preventDefault();
-});
+// form.addEventListener('submit', (e) => {
+//   var answer = validateRadio();
+//   if (answer) {
+//     populateAnswersArray(answer, pagination);
+//     pagination = numBox.value - 1;
+//     flushQContainer(questionContainer);
+//     populateQContainer(questionContainer, pagination);
+//     paginationCheck(pagination);
+//   } else {
+//     alert('Answer');
+//   }
+//   e.preventDefault();
+// });
 
-done.addEventListener('click', () => {
-  // alert();
-  var answer = validateRadio();
-  answersArray.push(answer);
-  modalMsg.innerHTML = `
-    <h5>Review of all the questions and your answers</h5>
-    <p>
-  `;
-  for (var i = 0; i < randomizedQArray.length; i++) {
-    modalMsg.innerHTML += `
-    <span class="new badge blue" data-badge-caption="Question"></span>Question ${
-      i + 1
-    }: ${randomizedQArray[i]}
-      <br>
-      You answered: ${answersArray[i]}
-      <br>
-    `;
-  }
-  modalMsg.innerHTML += `</p>`;
-});
+// done.addEventListener('click', () => {
+//   // alert();
+//   var answer = validateRadio();
+//   answersArray.push(answer);
+//   modalMsg.innerHTML = `
+//     <h5>Review of all the questions and your answers</h5>
+//     <p>
+//   `;
+//   for (var i = 0; i < randomizedQArray.length; i++) {
+//     modalMsg.innerHTML += `
+//     <span class="new badge blue" data-badge-caption="Question"></span>Question ${
+//       i + 1
+//     }: ${randomizedQArray[i]}
+//       <br>
+//       You answered: ${answersArray[i]}
+//       <br>
+//     `;
+//   }
+//   modalMsg.innerHTML += `</p>`;
+// });
 
 // modal js
 document.addEventListener('DOMContentLoaded', function () {
-  var elems = document.querySelectorAll('.modal');
-  var instances = M.Modal.init(elems);
+  M.AutoInit(modal);
+  // var instances = M.Modal.init(modal, {
+  //   dismissible: false,
+  // });
 });
