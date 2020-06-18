@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <!-- <link rel="stylesheet" href="style.css" /> -->
+  </head>
+  <body>
+    <div class="container">
+      <h1>Q&A</h1>
+      <div class="questions"></div>
+      <br /><br />
+      <button class="btn previous disabled">
+        Previous <i class="material-icons right">chevron_left</i>
+      </button>
+      <button class="btn next">
+        Next <i class="material-icons right">chevron_right</i>
+      </button>
+      <br />
+      <p>Your Progress</p>
+      <div class="progress">
+        <div class="determinate" style="width: 0%;"></div>
+      </div>
+      <br /><br />
+      <form action="" method="get">
+        <label for="qNumber">Go to question#: </label>
+        <input
+          type="number"
+          name="qNumber"
+          id=""
+          class="numBox"
+          min="1"
+          max="1"
+        />
+        <button class="btn" type="submit">
+          Jump <i class="material-icons right">directions</i>
+        </button>
+      </form>
+
+      <br /><br />
+      <button
+        class="btn disabled done modal-trigger"
+        type="submit"
+        data-target="modal1"
+      >
+        done
+      </button>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="modal1" class="modal modal-fixed-footer">
+      <div class="modal-content">
+        <h4>Quiz Submission</h4>
+        <div class="modalMsg"></div>
+      </div>
+      <div class="modal-footer">
+        <a
+          href="#!"
+          class="beginning modal-close waves-effect waves-green btn-flat"
+          >Go all the way from the start</a
+        >
+        <a href="#!" class="quit modal-close waves-effect waves-green btn-flat"
+          >Quit</a
+        >
+        <a
+          href="#!"
+          class="continue modal-close waves-effect waves-green btn-flat"
+          >Continue</a
+        >
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
