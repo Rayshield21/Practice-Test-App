@@ -138,18 +138,18 @@ var progressScale = Math.ceil(100 / randomizedQArray.length);
 paginationCheck(pagination);
 populateQContainer(questionContainer, pagination);
 
-previous.addEventListener('click', () => {
-  var answer = validateRadio();
-  if (answer) {
-    populateAnswersArray(answer, pagination);
-    pagination -= 1;
-    flushQContainer(questionContainer);
-    populateQContainer(questionContainer, pagination);
-    paginationCheck(pagination);
-  } else {
-    alert('Answer');
-  }
-});
+// previous.addEventListener('click', () => {
+//   var answer = validateRadio();
+//   if (answer) {
+//     populateAnswersArray(answer, pagination);
+//     pagination -= 1;
+//     flushQContainer(questionContainer);
+//     populateQContainer(questionContainer, pagination);
+//     paginationCheck(pagination);
+//   } else {
+//     alert('Answer');
+//   }
+// });
 
 next.addEventListener('click', (e) => {
   var answer = validateRadio();
