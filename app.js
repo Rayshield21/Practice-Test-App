@@ -50,6 +50,7 @@ function paginationCheck(p) {
   //   previous.classList.remove('disabled');
   // }
   if (pagination == randomizedQArray.length - 1) {
+    determinate.classList.add('red', 'accent-4');
     return true;
     // next.style.pointerEvents = 'none';
     // next.classList.add('disabled');
@@ -66,7 +67,7 @@ function populateQContainer(element, pagination) {
   newH2.innerHTML =
     `Question ${pagination + 1}: ` + randomizedQArray[pagination];
   element.appendChild(newH2);
-  var choices = questionAnswerData[randomizedQArray[pagination]].choices;
+  var choices = QnAdata[randomizedQArray[pagination]].choices;
 
   for (var i = 0; i < choices.length; i++) {
     var newLabel = document.createElement('label');
@@ -90,9 +91,90 @@ function populateQContainer(element, pagination) {
   }
 }
 
+function preLoader() {
+  modalMsg.innerHTML = `
+    <h4 class="center">Loading Results</h4>
+    <br/><br/>
+    <div class="row">
+      <div class="col s12 m4 l5"></div>
+        <div class="col s12 m4 l2">
+          <div class="preloader-wrapper big active">
+            <div class="spinner-layer spinner-blue">
+              <div class="circle-clipper left">
+              <div class="circle"></div>
+            </div><div class="gap-patch">
+              <div class="circle"></div>
+            </div><div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+
+          <div class="spinner-layer spinner-red">
+            <div class="circle-clipper left">
+              <div class="circle"></div>
+            </div><div class="gap-patch">
+              <div class="circle"></div>
+            </div><div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+
+          <div class="spinner-layer spinner-yellow">
+            <div class="circle-clipper left">
+              <div class="circle"></div>
+            </div><div class="gap-patch">
+              <div class="circle"></div>
+            </div><div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+
+          <div class="spinner-layer spinner-green">
+            <div class="circle-clipper left">
+              <div class="circle"></div>
+              </div><div class="gap-patch">
+              <div class="circle"></div>
+              </div><div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col s12 m4 l5"></div>
+    </div>    
+  `;
+}
+
+function roundToHundredths(num) {
+  hundredth = Math.pow(10, -2);
+  num /= hundredth;
+  return Math.round(num) * hundredth;
+}
+function calculateResults() {
+  var numberOfQuestions = randomizedQArray.length;
+  console.log(numberOfQuestions);
+  var numberOfCorrect = 0;
+  for (var i = 0; i < numberOfQuestions; i++) {
+    if (answersArray[i] == QnAdata[randomizedQArray[i]].correct) {
+      numberOfCorrect += 1;
+    }
+  }
+  var results = roundToHundredths((numberOfCorrect / numberOfQuestions) * 100);
+  return results;
+}
+
+function showResults(res) {
+  modalMsg.innerHTML = `
+    <div class="center">
+      <h4>Results</h4>
+      <h5> Your have a grade of ${res}%</h5>
+    </div>
+  `;
+}
+
 // keys = questions
 // properties = correct answer, choices array.
-var questionAnswerData = {
+var QnAdata = {
   '1+1': {
     correct: '2',
     choices: ['1', '2', '3'],
@@ -134,7 +216,7 @@ const determinate = getElement('.determinate');
 const modal = getElement('.modal');
 
 // question keys
-var questionsArray = generateQuestions(questionAnswerData);
+var questionsArray = generateQuestions(QnAdata);
 // random question keys order
 var randomizedQArray = sortRandom(questionsArray);
 var height = 20;
@@ -161,10 +243,21 @@ populateQContainer(questionContainer, pagination);
 //   }
 // });
 
+function pulseOnChecked(button) {
+  const radios = getElements(`input[name="question"]`);
+  radios.forEach((radio) => {
+    radio.addEventListener('click', (e) => {
+      if (e.target.checked) {
+        button.classList.add('pulse', 'btn-large', 'orange', 'darken-1');
+      }
+    });
+  });
+}
+
 next.addEventListener('click', (e) => {
   var answer = validateRadio();
   if (answer) {
-    populateAnswersArray(answer, pagination);
+    answersArray.push(answer);
     pagination += 1;
     flushQContainer(questionContainer);
     populateQContainer(questionContainer, pagination);
@@ -175,12 +268,19 @@ next.addEventListener('click', (e) => {
       newButton.setAttribute('type', 'submit');
       newButton.setAttribute('data-target', 'modal1');
       newButton.innerHTML = `Done <i class="material-icons right">send</i>`;
+      pulseOnChecked(newButton);
       newButton.addEventListener('click', () => {
         var answer = validateRadio();
         if (answer) {
           M.Modal.init(modal, {
             dismissible: false,
           });
+          preLoader();
+          window.setTimeout(() => {
+            var results = calculateResults();
+            showResults(results);
+          }, 5000);
+          answersArray.push(answer);
         } else {
           alert('answer');
         }
@@ -228,22 +328,22 @@ next.addEventListener('click', (e) => {
 // done.addEventListener('click', () => {
 //   // alert();
 //   var answer = validateRadio();
-//   answersArray.push(answer);
-//   modalMsg.innerHTML = `
-//     <h5>Review of all the questions and your answers</h5>
-//     <p>
+// answersArray.push(answer);
+// modalMsg.innerHTML = `
+//   <h5>Review of all the questions and your answers</h5>
+//   <p>
+// `;
+// for (var i = 0; i < randomizedQArray.length; i++) {
+//   modalMsg.innerHTML += `
+//   <span class="new badge blue" data-badge-caption="Question"></span>Question ${
+//     i + 1
+//   }: ${randomizedQArray[i]}
+//     <br>
+//     You answered: ${answersArray[i]}
+//     <br>
 //   `;
-//   for (var i = 0; i < randomizedQArray.length; i++) {
-//     modalMsg.innerHTML += `
-//     <span class="new badge blue" data-badge-caption="Question"></span>Question ${
-//       i + 1
-//     }: ${randomizedQArray[i]}
-//       <br>
-//       You answered: ${answersArray[i]}
-//       <br>
-//     `;
-//   }
-//   modalMsg.innerHTML += `</p>`;
+// }
+// modalMsg.innerHTML += `</p>`;
 // });
 
 // modal js
@@ -253,3 +353,17 @@ document.addEventListener('DOMContentLoaded', function () {
   //   dismissible: false,
   // });
 });
+
+// `
+//   <h5>Review of all the questions and your answers</h5>
+//   <p>
+// `;
+// for (var i = 0; i < randomizedQArray.length; i++) {
+//   modalMsg.innerHTML += `
+//   <span class="new badge blue" data-badge-caption="Question"></span>Question ${
+//     i + 1
+//   }: ${randomizedQArray[i]}
+//     <br/>
+//     You answered: ${answersArray[i]}
+//     <br/><br/>
+//   `;
