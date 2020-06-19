@@ -65,6 +65,7 @@ function populateQContainer(element, pagination) {
   var choices = currentQuestion.choices;
 
   for (var i = 0; i < choices.length; i++) {
+    var newP = document.createElement('p');
     var newLabel = document.createElement('label');
     var newRadio = document.createElement('input');
     var newSpan = document.createElement('span');
@@ -72,11 +73,12 @@ function populateQContainer(element, pagination) {
     newRadio.setAttribute('type', 'radio');
     newRadio.setAttribute('name', `question`);
     newRadio.setAttribute('value', `${choices[i]}`);
+    newRadio.classList.add('with-gap');
     newRadio.required = true;
     newLabel.appendChild(newRadio);
     newLabel.appendChild(newSpan);
-    element.appendChild(newLabel);
-    // element.appendChild(newRadio);
+    newP.appendChild(newLabel);
+    element.appendChild(newP);
   }
   if (pagination > currentMax) {
     currentMax = pagination;
