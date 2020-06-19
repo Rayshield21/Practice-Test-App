@@ -39,12 +39,30 @@ function paginationCheck(pagination) {
   return false;
 }
 
+function checkForImage() {
+  if (QnAdata[randomizedQArray[pagination]].imageDIR) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 function populateQContainer(element, pagination) {
-  var newH2 = document.createElement('h2');
-  newH2.innerHTML =
-    `Question ${pagination + 1}: ` + randomizedQArray[pagination];
-  element.appendChild(newH2);
-  var choices = QnAdata[randomizedQArray[pagination]].choices;
+  var questionKey = randomizedQArray[pagination];
+  var currentQuestion = QnAdata[questionKey];
+  var newH4 = document.createElement('h4');
+  var imageQuestionMsg = checkForImage()
+    ? `
+    Please refer to the image below.
+    <img class="materialBoxed responsive-img" src="${currentQuestion.imageDIR}"> 
+  `
+    : '';
+  newH4.innerHTML = `
+    Question ${pagination + 1}: ${imageQuestionMsg}
+    ${questionKey} 
+  `;
+  element.appendChild(newH4);
+  var choices = currentQuestion.choices;
 
   for (var i = 0; i < choices.length; i++) {
     var newLabel = document.createElement('label');
@@ -187,7 +205,6 @@ function getElement(s) {
 function getElements(s) {
   return document.querySelectorAll(s);
 }
-
 // keys = questions
 // properties = correct answer, choices array.
 var QnAdata = {
@@ -210,6 +227,11 @@ var QnAdata = {
   'Number of The Answer': {
     correct: '3',
     choices: ['3', '23', '8'],
+  },
+  'This image is taken from what monster hunter game': {
+    correct: 'MHP3RD',
+    choices: ['MH', 'MHDOS', 'MHF2', 'MHFU', 'MHP3RD', 'MHTRI', 'MH3U'],
+    imageDIR: `testImages/mhp3rd.jpg`,
   },
 };
 
