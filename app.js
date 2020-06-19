@@ -53,8 +53,8 @@ function populateQContainer(element, pagination) {
   var newH4 = document.createElement('h4');
   var imageQuestionMsg = checkForImage()
     ? `
-    Please refer to the image below.
-    <img class="materialBoxed responsive-img" src="${currentQuestion.imageDIR}"> 
+    Please refer to the image below. <br><br>
+    <img class="responsive-img" alt="question related image" src="${currentQuestion.imageDIR}"> 
   `
     : '';
   newH4.innerHTML = `
@@ -91,54 +91,54 @@ function preLoader() {
   continueButton.classList.add('disabled');
   modalMsg.innerHTML = `
     <h4 class="center">Loading Results</h4>
-    <br/><br/>
-    <div class="row center">
-      <div class="col s12 m4 l5"></div>
-        <div class="col s12 m4 l2">
-          <div class="preloader-wrapper big active">
-            <div class="spinner-layer spinner-blue">
-              <div class="circle-clipper left">
-              <div class="circle"></div>
-            </div><div class="gap-patch">
-              <div class="circle"></div>
-            </div><div class="circle-clipper right">
-              <div class="circle"></div>
-            </div>
-          </div>
-
-          <div class="spinner-layer spinner-red">
-            <div class="circle-clipper left">
-              <div class="circle"></div>
-            </div><div class="gap-patch">
-              <div class="circle"></div>
-            </div><div class="circle-clipper right">
-              <div class="circle"></div>
-            </div>
-          </div>
-
-          <div class="spinner-layer spinner-yellow">
-            <div class="circle-clipper left">
-              <div class="circle"></div>
-            </div><div class="gap-patch">
-              <div class="circle"></div>
-            </div><div class="circle-clipper right">
-              <div class="circle"></div>
-            </div>
-          </div>
-
-          <div class="spinner-layer spinner-green">
-            <div class="circle-clipper left">
-              <div class="circle"></div>
-              </div><div class="gap-patch">
-              <div class="circle"></div>
-              </div><div class="circle-clipper right">
-              <div class="circle"></div>
-            </div>
-          </div>
-        </div>
+    <br>
+    <div class="row">
+      <div class="col s12 m4 l4"></div>
+      <div class="col s12 m4 l4">
+      <div class="preloader-wrapper big active">
+      <div class="spinner-layer  spinner-blue">
+        <div class="circle-clipper left">
+        <div class="circle"></div>
+      </div><div class="gap-patch">
+        <div class="circle"></div>
+      </div><div class="circle-clipper right">
+        <div class="circle"></div>
       </div>
-      <div class="col s12 m4 l5"></div>
-    </div>    
+    </div>
+
+    <div class="spinner-layer spinner-red">
+      <div class="circle-clipper left">
+        <div class="circle"></div>
+      </div><div class="gap-patch">
+        <div class="circle"></div>
+      </div><div class="circle-clipper right">
+        <div class="circle"></div>
+      </div>
+    </div>
+
+    <div class="spinner-layer spinner-yellow">
+      <div class="circle-clipper left">
+        <div class="circle"></div>
+      </div><div class="gap-patch">
+        <div class="circle"></div>
+      </div><div class="circle-clipper right">
+        <div class="circle"></div>
+      </div>
+    </div>
+
+    <div class="spinner-layer spinner-green">
+      <div class="circle-clipper left">
+        <div class="circle"></div>
+        </div><div class="gap-patch">
+        <div class="circle"></div>
+        </div><div class="circle-clipper right">
+        <div class="circle"></div>
+      </div>
+    </div>        
+  
+      </div>
+      <div class="col s12 m4 l4"></div>
+    </div>
   `;
 }
 
@@ -319,6 +319,7 @@ quit.addEventListener('click', () => {
 
 continueButton.addEventListener('click', () => {
   randomizedQArray = sortRandom(incorrectlyAnsweredQuestions);
+  progressScale = Math.ceil(100 / randomizedQArray.length);
   incorrectlyAnsweredQuestions = [];
   pagination = 0;
   currentMax = 0;
