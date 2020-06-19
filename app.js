@@ -2,20 +2,9 @@ function sortRandom(array) {
   array.sort((a, b) => 0.5 - Math.random());
   return array;
 }
-function populateAnswersArray(answer, pagination) {
-  if (answersArray) {
-    if (pagination > currentMax) {
-      answersArray.push(answer);
-    } else {
-      answersArray[pagination] = answer;
-    }
-  } else {
-    answersArray.push(answer);
-  }
-}
 
 function changeNextButton() {
-  next.innerHTML = `Done <i class="material-icons right">send</i>`;
+  next.innerHTML = `Submit <i class="material-icons right">send</i>`;
   next.classList.remove('next');
 }
 function validateRadio() {
@@ -42,24 +31,12 @@ function flushQContainer(element) {
   }
 }
 
-function paginationCheck(p) {
-  // if (p == 0) {
-  //   previous.style.pointerEvents = 'none';
-  // } else {
-  //   previous.style.pointerEvents = 'auto';
-  //   previous.classList.remove('disabled');
-  // }
+function paginationCheck(pagination) {
   if (pagination == randomizedQArray.length - 1) {
     determinate.classList.add('red', 'accent-4');
     return true;
-    // next.style.pointerEvents = 'none';
-    // next.classList.add('disabled');
   }
   return false;
-  // else {
-  //   next.style.pointerEvents = 'auto';
-  //   next.classList.remove('disabled');
-  // }
 }
 
 function populateQContainer(element, pagination) {
@@ -86,16 +63,18 @@ function populateQContainer(element, pagination) {
   if (pagination > currentMax) {
     currentMax = pagination;
     currentProgress = (currentMax + 1) * progressScale;
-    // numBox.setAttribute('max', currentMax + 1);
     determinate.style.width = `${currentProgress}%`;
   }
 }
 
 function preLoader() {
+  restart.classList.add('disabled');
+  quit.classList.add('disabled');
+  continueButton.classList.add('disabled');
   modalMsg.innerHTML = `
     <h4 class="center">Loading Results</h4>
     <br/><br/>
-    <div class="row">
+    <div class="row center">
       <div class="col s12 m4 l5"></div>
         <div class="col s12 m4 l2">
           <div class="preloader-wrapper big active">
@@ -150,26 +129,63 @@ function roundToHundredths(num) {
   num /= hundredth;
   return Math.round(num) * hundredth;
 }
-function calculateResults() {
-  var numberOfQuestions = randomizedQArray.length;
-  console.log(numberOfQuestions);
-  var numberOfCorrect = 0;
-  for (var i = 0; i < numberOfQuestions; i++) {
-    if (answersArray[i] == QnAdata[randomizedQArray[i]].correct) {
-      numberOfCorrect += 1;
-    }
-  }
-  var results = roundToHundredths((numberOfCorrect / numberOfQuestions) * 100);
+function calculateResults(correctAnswers) {
+  var results = roundToHundredths((correctAnswers / numberOfQuestions) * 100);
   return results;
 }
 
+function checkAnswer(answer, pagination) {
+  if (answer == QnAdata[randomizedQArray[pagination]].correct) {
+    correctAnswers += 1;
+    M.toast({
+      html: `<span class="bold">Correct. </span>`,
+      classes: 'green accent-3',
+      displayLength: 1000,
+    });
+    return true;
+  } else {
+    M.toast({
+      html: `<span class="bold">Incorrect. <br> Correct Answer: ${
+        QnAdata[randomizedQArray[pagination]].correct
+      }</span>`,
+      classes: 'red',
+    });
+    incorrectlyAnsweredQuestions.push(randomizedQArray[pagination]);
+    return false;
+  }
+}
+
 function showResults(res) {
+  restart.classList.remove('disabled');
+  quit.classList.remove('disabled');
+  if (res != 100) {
+    continueButton.classList.remove('disabled');
+  }
   modalMsg.innerHTML = `
     <div class="center">
       <h4>Results</h4>
       <h5> Your have a grade of ${res}%</h5>
     </div>
   `;
+}
+
+function pulseOnChecked(button) {
+  const radios = getElements(`input[name="question"]`);
+  radios.forEach((radio) => {
+    radio.addEventListener('click', (e) => {
+      if (e.target.checked) {
+        button.classList.add('pulse', 'btn-large', 'orange', 'darken-1');
+      }
+    });
+  });
+}
+
+function getElement(s) {
+  return document.querySelector(s);
+}
+
+function getElements(s) {
+  return document.querySelectorAll(s);
 }
 
 // keys = questions
@@ -197,173 +213,103 @@ var QnAdata = {
   },
 };
 
-function getElement(s) {
-  return document.querySelector(s);
-}
-
-function getElements(s) {
-  return document.querySelectorAll(s);
-}
+// selected elements
 const questionContainer = getElement('.questions');
-// const previous = getElement('.previous');
 const next = getElement('.next');
+const submit = getElement('.submit');
 const buttonContainer = getElement('.buttonContainer');
-// const form = getElement('form');
-// const numBox = getElement('.numBox');
-// const done = getElement('.done');
 const modalMsg = getElement('.modalMsg');
 const determinate = getElement('.determinate');
 const modal = getElement('.modal');
+const restart = getElement('.restart');
+const quit = getElement('.quit');
+const continueButton = getElement('.continue');
 
 // question keys
 var questionsArray = generateQuestions(QnAdata);
 // random question keys order
 var randomizedQArray = sortRandom(questionsArray);
-var height = 20;
-var width = 40;
-var pulse = null;
-var answersArray = [];
+// populated when user submit answers
+var numberOfQuestions = randomizedQArray.length;
+var incorrectlyAnsweredQuestions = [];
 var pagination = 0;
 var currentMax = 0;
 var progressScale = Math.ceil(100 / randomizedQArray.length);
+var correctAnswers = 0;
 
-paginationCheck(pagination);
 populateQContainer(questionContainer, pagination);
 
-// previous.addEventListener('click', () => {
-//   var answer = validateRadio();
-//   if (answer) {
-//     populateAnswersArray(answer, pagination);
-//     pagination -= 1;
-//     flushQContainer(questionContainer);
-//     populateQContainer(questionContainer, pagination);
-//     paginationCheck(pagination);
-//   } else {
-//     alert('Answer');
-//   }
-// });
+// events
 
-function pulseOnChecked(button) {
-  const radios = getElements(`input[name="question"]`);
-  radios.forEach((radio) => {
-    radio.addEventListener('click', (e) => {
-      if (e.target.checked) {
-        button.classList.add('pulse', 'btn-large', 'orange', 'darken-1');
-      }
-    });
-  });
-}
+// load Materialize contents
+document.addEventListener('DOMContentLoaded', function () {
+  M.AutoInit(modal);
+});
 
 next.addEventListener('click', (e) => {
   var answer = validateRadio();
   if (answer) {
-    answersArray.push(answer);
+    checkAnswer(answer, pagination);
     pagination += 1;
     flushQContainer(questionContainer);
     populateQContainer(questionContainer, pagination);
     var finalQuestion = paginationCheck(pagination);
     if (finalQuestion) {
-      var newButton = document.createElement('button');
-      newButton.classList.add('btn', 'modal-trigger');
-      newButton.setAttribute('type', 'submit');
-      newButton.setAttribute('data-target', 'modal1');
-      newButton.innerHTML = `Done <i class="material-icons right">send</i>`;
-      pulseOnChecked(newButton);
-      newButton.addEventListener('click', () => {
-        var answer = validateRadio();
-        if (answer) {
-          M.Modal.init(modal, {
-            dismissible: false,
-          });
-          preLoader();
-          window.setTimeout(() => {
-            var results = calculateResults();
-            showResults(results);
-          }, 5000);
-          answersArray.push(answer);
-        } else {
-          alert('answer');
-        }
-      });
-      buttonContainer.appendChild(newButton);
-      buttonContainer.removeChild(next);
+      submit.classList.toggle('none');
+      next.classList.toggle('none');
+      pulseOnChecked(submit);
     }
   } else {
-    alert('Answer');
+    M.toast({ html: 'Please Answer!', classes: 'red', displayLength: 1000 });
   }
-  //   if (e.target.classList.contains('disabled')) {
-  //     var radios = getElements(`input[name="question"]`);
-  //     console.log(radios);
-  //     radios.forEach((radio) => {
-  //       radio.addEventListener('click', (re) => {
-  //         if (re.target.checked) {
-  //           done.classList.remove('disabled');
-  //           done.classList.add(
-  //             'btn-large',
-  //             'waves-effect',
-  //             'waves-light',
-  //             'pulse'
-  //           );
-  //           done.innerHTML = `Done <i class="material-icons right">send</i>`;
-  //         }
-  //       });
-  //     });
-  //   }
 });
 
-// form.addEventListener('submit', (e) => {
-//   var answer = validateRadio();
-//   if (answer) {
-//     populateAnswersArray(answer, pagination);
-//     pagination = numBox.value - 1;
-//     flushQContainer(questionContainer);
-//     populateQContainer(questionContainer, pagination);
-//     paginationCheck(pagination);
-//   } else {
-//     alert('Answer');
-//   }
-//   e.preventDefault();
-// });
-
-// done.addEventListener('click', () => {
-//   // alert();
-//   var answer = validateRadio();
-// answersArray.push(answer);
-// modalMsg.innerHTML = `
-//   <h5>Review of all the questions and your answers</h5>
-//   <p>
-// `;
-// for (var i = 0; i < randomizedQArray.length; i++) {
-//   modalMsg.innerHTML += `
-//   <span class="new badge blue" data-badge-caption="Question"></span>Question ${
-//     i + 1
-//   }: ${randomizedQArray[i]}
-//     <br>
-//     You answered: ${answersArray[i]}
-//     <br>
-//   `;
-// }
-// modalMsg.innerHTML += `</p>`;
-// });
-
-// modal js
-document.addEventListener('DOMContentLoaded', function () {
-  M.AutoInit(modal);
-  // var instances = M.Modal.init(modal, {
-  //   dismissible: false,
-  // });
+submit.addEventListener('click', () => {
+  var answer = validateRadio();
+  if (answer) {
+    checkAnswer(answer, pagination);
+    M.Modal.init(modal, {
+      dismissible: false,
+    });
+    submit.classList.toggle('none');
+    next.classList.toggle('none');
+    submit.classList.remove('pulse', 'orange', 'darken-1', 'btn-large');
+    preLoader();
+    window.setTimeout(() => {
+      var results = calculateResults(correctAnswers);
+      showResults(results);
+    }, 5000);
+  } else {
+    alert('answer');
+  }
 });
 
-// `
-//   <h5>Review of all the questions and your answers</h5>
-//   <p>
-// `;
-// for (var i = 0; i < randomizedQArray.length; i++) {
-//   modalMsg.innerHTML += `
-//   <span class="new badge blue" data-badge-caption="Question"></span>Question ${
-//     i + 1
-//   }: ${randomizedQArray[i]}
-//     <br/>
-//     You answered: ${answersArray[i]}
-//     <br/><br/>
-//   `;
+restart.addEventListener('click', () => location.reload());
+quit.addEventListener('click', () => {
+  document.body.style.pointerEvents = 'none';
+  next.classList.add('disabled');
+  determinate.classList.remove('red', 'accent-4');
+  determinate.classList.add('grey');
+  questionContainer.innerHTML = `
+    <h1>Final Result: ${calculateResults(correctAnswers)}%</h1>
+  `;
+});
+
+continueButton.addEventListener('click', () => {
+  randomizedQArray = sortRandom(incorrectlyAnsweredQuestions);
+  incorrectlyAnsweredQuestions = [];
+  pagination = 0;
+  currentMax = 0;
+  determinate.classList.remove('red', 'accent-4');
+  determinate.style.width = `${0}%`;
+  flushQContainer(questionContainer);
+  populateQContainer(questionContainer, pagination);
+  var finalQuestion = paginationCheck(pagination);
+  if (finalQuestion) {
+    determinate.classList.add('red', 'accent-4');
+    determinate.style.width = `${100}%`;
+    submit.classList.toggle('none');
+    next.classList.toggle('none');
+    pulseOnChecked(submit);
+  }
+});
