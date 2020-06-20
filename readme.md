@@ -34,7 +34,7 @@ export const testQuestionData = {
 export const testQuestionData = {
   // Edit under this block
   "|question|": {
-    <correct>: "|answer|",
+    correct: "|answer|",
     choices: [
       "|choice1|",
       "|choice2|",
