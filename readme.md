@@ -22,7 +22,7 @@ export const testQuestionData = {
   'What is the name of this guy': {
     correct: 'Pacman',
     choices: ['X-Pac', 'Tupac', 'Pacman', 'PuckBoy'],
-    imageDIR: '/images/rawr.jpg',
+    imageDIR: 'images/rawr.jpg',
     multipleAnswer: false,
   },
 };
@@ -40,7 +40,7 @@ export const testQuestionData = {
       "|choice2|",
       "|choice3|"
     ],
-    imageDIR: '/images/|filename|.jpg' or |false|,
+    imageDIR: 'images/|filename|.jpg' or |false|,
     multipleAnswer: |true or false|,
   },
 };
