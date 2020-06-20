@@ -7,11 +7,12 @@ function changeNextButton() {
   next.innerHTML = `Submit <i class="material-icons right">send</i>`;
   next.classList.remove('next');
 }
-function validateRadio() {
-  radioName = getElement(`input[type="radio"]`).getAttribute('name');
-  radioChecked = getElement(`input[name= "${radioName}"]:checked`);
-  if (radioChecked) {
-    return radioChecked.value;
+
+function validateInput() {
+  inputName = getElement(`input`).getAttribute('name');
+  inputChecked = getElement(`input[name= "${inputName}"]:checked`);
+  if (inputChecked) {
+    return true;
   } else {
     return false;
   }
@@ -39,21 +40,15 @@ function paginationCheck(pagination) {
   return false;
 }
 
-function checkForImage() {
-  if (QnAdata[randomizedQArray[pagination]].imageDIR) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
 function populateQContainer(element, pagination) {
   var questionKey = randomizedQArray[pagination];
   var currentQuestionProp = QnAdata[questionKey];
+  var inputType = currentQuestionProp.multipleAnswer ? 'checkbox' : 'radio';
+  var imgAvailable = currentQuestionProp.imageDIR ? true : false;
   var newH4 = document.createElement('h4');
-  var imageQuestionMsg = checkForImage()
+  var imageQuestionMsg = imgAvailable
     ? `
-    Please refer to the image below. <br><br>
+    Please refer to the exhibit below. <br><br>
     <img class="responsive-img" alt="question related image" src="${currentQuestionProp.imageDIR}"> 
   `
     : '';
@@ -67,15 +62,14 @@ function populateQContainer(element, pagination) {
   for (var i = 0; i < choices.length; i++) {
     var newP = document.createElement('p');
     var newLabel = document.createElement('label');
-    var newRadio = document.createElement('input');
+    var newInput = document.createElement('input');
     var newSpan = document.createElement('span');
     newSpan.innerHTML = choices[i];
-    newRadio.setAttribute('type', 'radio');
-    newRadio.setAttribute('name', `question`);
-    newRadio.setAttribute('value', `${choices[i]}`);
-    newRadio.classList.add('with-gap');
-    newRadio.required = true;
-    newLabel.appendChild(newRadio);
+    newInput.setAttribute('type', inputType);
+    newInput.setAttribute('name', `question`);
+    newInput.setAttribute('value', `${choices[i]}`);
+    newInput.classList.add('with-gap');
+    newLabel.appendChild(newInput);
     newLabel.appendChild(newSpan);
     newP.appendChild(newLabel);
     element.appendChild(newP);
@@ -147,31 +141,82 @@ function preLoader() {
 function roundToHundredths(num) {
   hundredth = Math.pow(10, -2);
   num /= hundredth;
-  return Math.round(num) * hundredth;
+  return Number(Math.round(num) * hundredth).toFixed(2);
 }
 function calculateResults(correctAnswers) {
   var results = roundToHundredths((correctAnswers / numberOfQuestions) * 100);
   return results;
 }
 
+function getAnswer() {
+  const inputs = getElements('input');
+  var answersArray = [];
+  for (input of inputs) {
+    if (input.checked) {
+      answersArray.push(input.value);
+    }
+  }
+  return answersArray;
+}
+
+function processAnswers(answers, currentQuestion) {
+  if (answers.length == currentQuestion.correct.length) {
+    for (answer of answers) {
+      if (currentQuestion.correct.includes(answer)) {
+        continue;
+      } else {
+        return false;
+      }
+    }
+  } else {
+    return false;
+  }
+  return true;
+}
+
+function showAlert(alert, currentQuestion) {
+  switch (alert) {
+    case 'correct':
+      M.toast({
+        html: `<span class="bold">Correct. </span>`,
+        classes: 'green accent-3',
+        displayLength: 1000,
+      });
+      break;
+    case 'incorrect':
+      M.toast({
+        html: `<span class="bold">Incorrect. <br><br>Correct Answer: ${currentQuestion.correct}</span>`,
+        classes: 'red',
+      });
+      break;
+    case 'invalid':
+      M.toast({ html: 'Please Answer!', classes: 'red', displayLength: 1000 });
+      break;
+  }
+}
+
 function checkAnswer(answer, pagination) {
   var questionKey = randomizedQArray[pagination];
   var currentQuestionProp = QnAdata[questionKey];
-  if (answer == currentQuestionProp.correct) {
-    correctAnswers += 1;
-    M.toast({
-      html: `<span class="bold">Correct. </span>`,
-      classes: 'green accent-3',
-      displayLength: 1000,
-    });
-    return true;
+  var correct = false;
+  if (currentQuestionProp.multipleAnswer) {
+    correct = processAnswers(answer, currentQuestionProp);
+    if (correct) {
+      correctAnswers += 1;
+      showAlert('correct', currentQuestionProp);
+    } else {
+      showAlert('incorrect', currentQuestionProp);
+      incorrectlyAnsweredQuestions.push(questionKey);
+    }
   } else {
-    M.toast({
-      html: `<span class="bold">Incorrect. <br> Correct Answer: ${currentQuestionProp.correct}</span>`,
-      classes: 'red',
-    });
-    incorrectlyAnsweredQuestions.push(randomizedQArray[pagination]);
-    return false;
+    correct = answer[0] == currentQuestionProp.correct;
+    if (correct) {
+      correctAnswers += 1;
+      showAlert('correct', currentQuestionProp);
+    } else {
+      showAlert('incorrect', currentQuestionProp);
+      incorrectlyAnsweredQuestions.push(questionKey);
+    }
   }
 }
 
@@ -190,9 +235,9 @@ function showResults(res) {
 }
 
 function pulseOnChecked(button) {
-  const radios = getElements(`input[name="question"]`);
-  radios.forEach((radio) => {
-    radio.addEventListener('click', (e) => {
+  const inputs = getElements(`input[name="question"]`);
+  inputs.forEach((input) => {
+    input.addEventListener('click', (e) => {
       if (e.target.checked) {
         button.classList.add('pulse', 'btn-large', 'orange', 'darken-1');
       }
@@ -213,27 +258,53 @@ var QnAdata = {
   '1+1': {
     correct: '2',
     choices: ['1', '2', '3'],
+    imageDIR: false,
+    multipleAnswer: false,
   },
   '5**2': {
     correct: '25',
     choices: ['4', '81', '25'],
+    imageDIR: false,
+    multipleAnswer: false,
   },
   '10^3': {
     correct: '1000',
     choices: ['10', '100', '1000'],
+    imageDIR: false,
+    multipleAnswer: false,
   },
   'Meaning of Life': {
     correct: '42',
     choices: ['42', '69', '96'],
+    imageDIR: false,
+    multipleAnswer: false,
   },
   'Number of The Answer': {
     correct: '3',
     choices: ['3', '23', '8'],
+    imageDIR: false,
+    multipleAnswer: false,
   },
   'This image is taken from what monster hunter game': {
     correct: 'MHP3RD',
     choices: ['MH', 'MHDOS', 'MHF2', 'MHFU', 'MHP3RD', 'MHTRI', 'MH3U'],
     imageDIR: `testImages/mhp3rd.jpg`,
+    multipleAnswer: false,
+  },
+  'The image came from one of the games of Capcom? What games are made by Capcom? Check all correct answers': {
+    correct: ['Monster Hunter', 'Megaman', 'Resident Evil', 'Breath of Fire'],
+    choices: [
+      'Megaman',
+      'Onimusha: Warlords',
+      'Resident Evil',
+      'Dauntless',
+      'Monster Hunter',
+      'Dark Souls',
+      'Dragon Quest',
+      'Breath of Fire',
+    ],
+    imageDIR: 'testImages/mhp3rd.jpg',
+    multipleAnswer: true,
   },
 };
 
@@ -271,8 +342,9 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 next.addEventListener('click', (e) => {
-  var answer = validateRadio();
-  if (answer) {
+  var answered = validateInput();
+  if (answered) {
+    var answer = getAnswer();
     checkAnswer(answer, pagination);
     pagination += 1;
     flushQContainer(questionContainer);
@@ -284,13 +356,14 @@ next.addEventListener('click', (e) => {
       pulseOnChecked(submit);
     }
   } else {
-    M.toast({ html: 'Please Answer!', classes: 'red', displayLength: 1000 });
+    showAlert('invalid', null);
   }
 });
 
 submit.addEventListener('click', () => {
-  var answer = validateRadio();
-  if (answer) {
+  var answered = validateInput();
+  if (answered) {
+    var answer = getAnswer();
     checkAnswer(answer, pagination);
     M.Modal.init(modal, {
       dismissible: false,
@@ -304,7 +377,7 @@ submit.addEventListener('click', () => {
       showResults(results);
     }, 5000);
   } else {
-    alert('answer');
+    showAlert('invalid', null);
   }
 });
 
