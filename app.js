@@ -1,17 +1,15 @@
+import { testQuestionData } from './sampleData.js';
+
 function sortRandom(array) {
   array.sort((a, b) => 0.5 - Math.random());
   return array;
 }
 
-function changeNextButton() {
-  next.innerHTML = `Submit <i class="material-icons right">send</i>`;
-  next.classList.remove('next');
-}
-function validateRadio() {
-  radioName = getElement(`input[type="radio"]`).getAttribute('name');
-  radioChecked = getElement(`input[name= "${radioName}"]:checked`);
-  if (radioChecked) {
-    return radioChecked.value;
+function validateInput() {
+  let inputName = getElement(`input`).getAttribute('name');
+  let inputChecked = getElement(`input[name= "${inputName}"]:checked`);
+  if (inputChecked) {
+    return true;
   } else {
     return false;
   }
@@ -19,7 +17,7 @@ function validateRadio() {
 
 function generateQuestions(dataObj) {
   var questions = [];
-  for (data in dataObj) {
+  for (let data in dataObj) {
     questions.push(data);
   }
   return questions;
@@ -40,29 +38,42 @@ function paginationCheck(pagination) {
 }
 
 function populateQContainer(element, pagination) {
-  var newH2 = document.createElement('h2');
-  newH2.innerHTML =
-    `Question ${pagination + 1}: ` + randomizedQArray[pagination];
-  element.appendChild(newH2);
-  var choices = QnAdata[randomizedQArray[pagination]].choices;
+  var questionKey = randomizedQArray[pagination];
+  var currentQuestionProp = testQuestionData[questionKey];
+  var inputType = currentQuestionProp.multipleAnswer ? 'checkbox' : 'radio';
+  var imgAvailable = currentQuestionProp.imageDIR ? true : false;
+  var newH4 = document.createElement('h4');
+  var imageQuestionMsg = imgAvailable
+    ? `
+    Please refer to the exhibit below. <br><br>
+    <img class="responsive-img" alt="question related image" src="${currentQuestionProp.imageDIR}"> 
+  `
+    : '';
+  newH4.innerHTML = `
+    Question ${pagination + 1}: ${imageQuestionMsg}
+    ${questionKey}?
+  `;
+  element.appendChild(newH4);
+  var choices = currentQuestionProp.choices;
 
   for (var i = 0; i < choices.length; i++) {
+    var newP = document.createElement('p');
     var newLabel = document.createElement('label');
-    var newRadio = document.createElement('input');
+    var newInput = document.createElement('input');
     var newSpan = document.createElement('span');
     newSpan.innerHTML = choices[i];
-    newRadio.setAttribute('type', 'radio');
-    newRadio.setAttribute('name', `question`);
-    newRadio.setAttribute('value', `${choices[i]}`);
-    newRadio.required = true;
-    newLabel.appendChild(newRadio);
+    newInput.setAttribute('type', inputType);
+    newInput.setAttribute('name', `question`);
+    newInput.setAttribute('value', `${choices[i]}`);
+    newInput.classList.add('with-gap');
+    newLabel.appendChild(newInput);
     newLabel.appendChild(newSpan);
-    element.appendChild(newLabel);
-    // element.appendChild(newRadio);
+    newP.appendChild(newLabel);
+    element.appendChild(newP);
   }
   if (pagination > currentMax) {
     currentMax = pagination;
-    currentProgress = (currentMax + 1) * progressScale;
+    let currentProgress = (currentMax + 1) * progressScale;
     determinate.style.width = `${currentProgress}%`;
   }
 }
@@ -73,85 +84,136 @@ function preLoader() {
   continueButton.classList.add('disabled');
   modalMsg.innerHTML = `
     <h4 class="center">Loading Results</h4>
-    <br/><br/>
-    <div class="row center">
-      <div class="col s12 m4 l5"></div>
-        <div class="col s12 m4 l2">
-          <div class="preloader-wrapper big active">
-            <div class="spinner-layer spinner-blue">
-              <div class="circle-clipper left">
-              <div class="circle"></div>
-            </div><div class="gap-patch">
-              <div class="circle"></div>
-            </div><div class="circle-clipper right">
-              <div class="circle"></div>
-            </div>
-          </div>
-
-          <div class="spinner-layer spinner-red">
-            <div class="circle-clipper left">
-              <div class="circle"></div>
-            </div><div class="gap-patch">
-              <div class="circle"></div>
-            </div><div class="circle-clipper right">
-              <div class="circle"></div>
-            </div>
-          </div>
-
-          <div class="spinner-layer spinner-yellow">
-            <div class="circle-clipper left">
-              <div class="circle"></div>
-            </div><div class="gap-patch">
-              <div class="circle"></div>
-            </div><div class="circle-clipper right">
-              <div class="circle"></div>
-            </div>
-          </div>
-
-          <div class="spinner-layer spinner-green">
-            <div class="circle-clipper left">
-              <div class="circle"></div>
-              </div><div class="gap-patch">
-              <div class="circle"></div>
-              </div><div class="circle-clipper right">
-              <div class="circle"></div>
-            </div>
-          </div>
-        </div>
+    <br>
+    <div class="row">
+      <div class="col s12 m4 l4"></div>
+      <div class="col s12 m4 l4">
+      <div class="preloader-wrapper big active">
+      <div class="spinner-layer  spinner-blue">
+        <div class="circle-clipper left">
+        <div class="circle"></div>
+      </div><div class="gap-patch">
+        <div class="circle"></div>
+      </div><div class="circle-clipper right">
+        <div class="circle"></div>
       </div>
-      <div class="col s12 m4 l5"></div>
-    </div>    
+    </div>
+
+    <div class="spinner-layer spinner-red">
+      <div class="circle-clipper left">
+        <div class="circle"></div>
+      </div><div class="gap-patch">
+        <div class="circle"></div>
+      </div><div class="circle-clipper right">
+        <div class="circle"></div>
+      </div>
+    </div>
+
+    <div class="spinner-layer spinner-yellow">
+      <div class="circle-clipper left">
+        <div class="circle"></div>
+      </div><div class="gap-patch">
+        <div class="circle"></div>
+      </div><div class="circle-clipper right">
+        <div class="circle"></div>
+      </div>
+    </div>
+
+    <div class="spinner-layer spinner-green">
+      <div class="circle-clipper left">
+        <div class="circle"></div>
+        </div><div class="gap-patch">
+        <div class="circle"></div>
+        </div><div class="circle-clipper right">
+        <div class="circle"></div>
+      </div>
+    </div>        
+  
+      </div>
+      <div class="col s12 m4 l4"></div>
+    </div>
   `;
 }
 
 function roundToHundredths(num) {
-  hundredth = Math.pow(10, -2);
-  num /= hundredth;
-  return Math.round(num) * hundredth;
+  let hundredths = Math.pow(10, -2);
+  num /= hundredths;
+  return Number(Math.round(num) * hundredths).toFixed(2);
 }
 function calculateResults(correctAnswers) {
   var results = roundToHundredths((correctAnswers / numberOfQuestions) * 100);
   return results;
 }
 
-function checkAnswer(answer, pagination) {
-  if (answer == QnAdata[randomizedQArray[pagination]].correct) {
-    correctAnswers += 1;
-    M.toast({
-      html: `<span class="bold">Correct. </span>`,
-      classes: 'green accent-3',
-      displayLength: 1000,
-    });
-    return true;
+function getAnswer() {
+  const inputs = getElements('input');
+  var answersArray = [];
+  for (let input of inputs) {
+    if (input.checked) {
+      answersArray.push(input.value);
+    }
+  }
+  return answersArray;
+}
+
+function processAnswers(answers, currentQuestion) {
+  if (answers.length == currentQuestion.correct.length) {
+    for (let answer of answers) {
+      if (currentQuestion.correct.includes(answer)) {
+        continue;
+      } else {
+        return false;
+      }
+    }
   } else {
-    M.toast({
-      html: `<span class="bold">Incorrect. <br> Correct Answer: ${
-        QnAdata[randomizedQArray[pagination]].correct
-      }</span>`,
-      classes: 'red',
-    });
-    incorrectlyAnsweredQuestions.push(randomizedQArray[pagination]);
     return false;
+  }
+  return true;
+}
+
+function showAlert(alert, currentQuestion) {
+  switch (alert) {
+    case 'correct':
+      M.toast({
+        html: `<span class="bold">Correct. </span>`,
+        classes: 'green accent-3',
+        displayLength: 1000,
+      });
+      break;
+    case 'incorrect':
+      M.toast({
+        html: `<span class="bold">Incorrect. <br><br>Correct Answer: ${currentQuestion.correct}</span>`,
+        classes: 'red',
+      });
+      break;
+    case 'invalid':
+      M.toast({ html: 'Please Answer!', classes: 'red', displayLength: 1000 });
+      break;
+  }
+}
+
+function checkAnswer(answer, pagination) {
+  var questionKey = randomizedQArray[pagination];
+  var currentQuestionProp = testQuestionData[questionKey];
+  var correct = false;
+  if (currentQuestionProp.multipleAnswer) {
+    correct = processAnswers(answer, currentQuestionProp);
+    if (correct) {
+      correctAnswers += 1;
+      showAlert('correct', currentQuestionProp);
+    } else {
+      showAlert('incorrect', currentQuestionProp);
+      incorrectlyAnsweredQuestions.push(questionKey);
+    }
+  } else {
+    correct = answer[0] == currentQuestionProp.correct;
+    if (correct) {
+      correctAnswers += 1;
+      showAlert('correct', currentQuestionProp);
+    } else {
+      showAlert('incorrect', currentQuestionProp);
+      incorrectlyAnsweredQuestions.push(questionKey);
+    }
   }
 }
 
@@ -170,9 +232,9 @@ function showResults(res) {
 }
 
 function pulseOnChecked(button) {
-  const radios = getElements(`input[name="question"]`);
-  radios.forEach((radio) => {
-    radio.addEventListener('click', (e) => {
+  const inputs = getElements(`input[name="question"]`);
+  inputs.forEach((input) => {
+    input.addEventListener('click', (e) => {
       if (e.target.checked) {
         button.classList.add('pulse', 'btn-large', 'orange', 'darken-1');
       }
@@ -188,31 +250,6 @@ function getElements(s) {
   return document.querySelectorAll(s);
 }
 
-// keys = questions
-// properties = correct answer, choices array.
-var QnAdata = {
-  '1+1': {
-    correct: '2',
-    choices: ['1', '2', '3'],
-  },
-  '5**2': {
-    correct: '25',
-    choices: ['4', '81', '25'],
-  },
-  '10^3': {
-    correct: '1000',
-    choices: ['10', '100', '1000'],
-  },
-  'Meaning of Life': {
-    correct: '42',
-    choices: ['42', '69', '96'],
-  },
-  'Number of The Answer': {
-    correct: '3',
-    choices: ['3', '23', '8'],
-  },
-};
-
 // selected elements
 const questionContainer = getElement('.questions');
 const next = getElement('.next');
@@ -226,7 +263,7 @@ const quit = getElement('.quit');
 const continueButton = getElement('.continue');
 
 // question keys
-var questionsArray = generateQuestions(QnAdata);
+var questionsArray = generateQuestions(testQuestionData);
 // random question keys order
 var randomizedQArray = sortRandom(questionsArray);
 // populated when user submit answers
@@ -237,7 +274,16 @@ var currentMax = 0;
 var progressScale = Math.ceil(100 / randomizedQArray.length);
 var correctAnswers = 0;
 
+// initialize app
 populateQContainer(questionContainer, pagination);
+var finalQuestion = paginationCheck(pagination);
+if (finalQuestion) {
+  determinate.classList.add('red', 'accent-4');
+  determinate.style.width = `${100}%`;
+  submit.classList.toggle('none');
+  next.classList.toggle('none');
+  pulseOnChecked(submit);
+}
 
 // events
 
@@ -247,8 +293,9 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 next.addEventListener('click', (e) => {
-  var answer = validateRadio();
-  if (answer) {
+  var answered = validateInput();
+  if (answered) {
+    var answer = getAnswer();
     checkAnswer(answer, pagination);
     pagination += 1;
     flushQContainer(questionContainer);
@@ -260,13 +307,14 @@ next.addEventListener('click', (e) => {
       pulseOnChecked(submit);
     }
   } else {
-    M.toast({ html: 'Please Answer!', classes: 'red', displayLength: 1000 });
+    showAlert('invalid', null);
   }
 });
 
 submit.addEventListener('click', () => {
-  var answer = validateRadio();
-  if (answer) {
+  var answered = validateInput();
+  if (answered) {
+    var answer = getAnswer();
     checkAnswer(answer, pagination);
     M.Modal.init(modal, {
       dismissible: false,
@@ -280,7 +328,7 @@ submit.addEventListener('click', () => {
       showResults(results);
     }, 5000);
   } else {
-    alert('answer');
+    showAlert('invalid', null);
   }
 });
 
@@ -291,12 +339,15 @@ quit.addEventListener('click', () => {
   determinate.classList.remove('red', 'accent-4');
   determinate.classList.add('grey');
   questionContainer.innerHTML = `
-    <h1>Final Result: ${calculateResults(correctAnswers)}%</h1>
+    <h1 class='center-align'>Final Result: ${calculateResults(
+      correctAnswers
+    )}%</h1>
   `;
 });
 
 continueButton.addEventListener('click', () => {
   randomizedQArray = sortRandom(incorrectlyAnsweredQuestions);
+  progressScale = Math.ceil(100 / randomizedQArray.length);
   incorrectlyAnsweredQuestions = [];
   pagination = 0;
   currentMax = 0;
