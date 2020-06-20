@@ -49,12 +49,12 @@ function checkForImage() {
 
 function populateQContainer(element, pagination) {
   var questionKey = randomizedQArray[pagination];
-  var currentQuestion = QnAdata[questionKey];
+  var currentQuestionProp = QnAdata[questionKey];
   var newH4 = document.createElement('h4');
   var imageQuestionMsg = checkForImage()
     ? `
     Please refer to the image below. <br><br>
-    <img class="responsive-img" alt="question related image" src="${currentQuestion.imageDIR}"> 
+    <img class="responsive-img" alt="question related image" src="${currentQuestionProp.imageDIR}"> 
   `
     : '';
   newH4.innerHTML = `
@@ -62,7 +62,7 @@ function populateQContainer(element, pagination) {
     ${questionKey} 
   `;
   element.appendChild(newH4);
-  var choices = currentQuestion.choices;
+  var choices = currentQuestionProp.choices;
 
   for (var i = 0; i < choices.length; i++) {
     var newP = document.createElement('p');
@@ -155,7 +155,9 @@ function calculateResults(correctAnswers) {
 }
 
 function checkAnswer(answer, pagination) {
-  if (answer == QnAdata[randomizedQArray[pagination]].correct) {
+  var questionKey = randomizedQArray[pagination];
+  var currentQuestionProp = QnAdata[questionKey];
+  if (answer == currentQuestionProp.correct) {
     correctAnswers += 1;
     M.toast({
       html: `<span class="bold">Correct. </span>`,
@@ -165,9 +167,7 @@ function checkAnswer(answer, pagination) {
     return true;
   } else {
     M.toast({
-      html: `<span class="bold">Incorrect. <br> Correct Answer: ${
-        QnAdata[randomizedQArray[pagination]].correct
-      }</span>`,
+      html: `<span class="bold">Incorrect. <br> Correct Answer: ${currentQuestionProp.correct}</span>`,
       classes: 'red',
     });
     incorrectlyAnsweredQuestions.push(randomizedQArray[pagination]);
