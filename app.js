@@ -1,16 +1,13 @@
+import { testQuestionData } from './sampleData.js';
+
 function sortRandom(array) {
   array.sort((a, b) => 0.5 - Math.random());
   return array;
 }
 
-function changeNextButton() {
-  next.innerHTML = `Submit <i class="material-icons right">send</i>`;
-  next.classList.remove('next');
-}
-
 function validateInput() {
-  inputName = getElement(`input`).getAttribute('name');
-  inputChecked = getElement(`input[name= "${inputName}"]:checked`);
+  let inputName = getElement(`input`).getAttribute('name');
+  let inputChecked = getElement(`input[name= "${inputName}"]:checked`);
   if (inputChecked) {
     return true;
   } else {
@@ -20,7 +17,7 @@ function validateInput() {
 
 function generateQuestions(dataObj) {
   var questions = [];
-  for (data in dataObj) {
+  for (let data in dataObj) {
     questions.push(data);
   }
   return questions;
@@ -42,7 +39,7 @@ function paginationCheck(pagination) {
 
 function populateQContainer(element, pagination) {
   var questionKey = randomizedQArray[pagination];
-  var currentQuestionProp = QnAdata[questionKey];
+  var currentQuestionProp = testQuestionData[questionKey];
   var inputType = currentQuestionProp.multipleAnswer ? 'checkbox' : 'radio';
   var imgAvailable = currentQuestionProp.imageDIR ? true : false;
   var newH4 = document.createElement('h4');
@@ -54,7 +51,7 @@ function populateQContainer(element, pagination) {
     : '';
   newH4.innerHTML = `
     Question ${pagination + 1}: ${imageQuestionMsg}
-    ${questionKey} 
+    ${questionKey}?
   `;
   element.appendChild(newH4);
   var choices = currentQuestionProp.choices;
@@ -76,7 +73,7 @@ function populateQContainer(element, pagination) {
   }
   if (pagination > currentMax) {
     currentMax = pagination;
-    currentProgress = (currentMax + 1) * progressScale;
+    let currentProgress = (currentMax + 1) * progressScale;
     determinate.style.width = `${currentProgress}%`;
   }
 }
@@ -139,9 +136,9 @@ function preLoader() {
 }
 
 function roundToHundredths(num) {
-  hundredth = Math.pow(10, -2);
-  num /= hundredth;
-  return Number(Math.round(num) * hundredth).toFixed(2);
+  let hundredths = Math.pow(10, -2);
+  num /= hundredths;
+  return Number(Math.round(num) * hundredths).toFixed(2);
 }
 function calculateResults(correctAnswers) {
   var results = roundToHundredths((correctAnswers / numberOfQuestions) * 100);
@@ -151,7 +148,7 @@ function calculateResults(correctAnswers) {
 function getAnswer() {
   const inputs = getElements('input');
   var answersArray = [];
-  for (input of inputs) {
+  for (let input of inputs) {
     if (input.checked) {
       answersArray.push(input.value);
     }
@@ -161,7 +158,7 @@ function getAnswer() {
 
 function processAnswers(answers, currentQuestion) {
   if (answers.length == currentQuestion.correct.length) {
-    for (answer of answers) {
+    for (let answer of answers) {
       if (currentQuestion.correct.includes(answer)) {
         continue;
       } else {
@@ -197,7 +194,7 @@ function showAlert(alert, currentQuestion) {
 
 function checkAnswer(answer, pagination) {
   var questionKey = randomizedQArray[pagination];
-  var currentQuestionProp = QnAdata[questionKey];
+  var currentQuestionProp = testQuestionData[questionKey];
   var correct = false;
   if (currentQuestionProp.multipleAnswer) {
     correct = processAnswers(answer, currentQuestionProp);
@@ -252,61 +249,6 @@ function getElement(s) {
 function getElements(s) {
   return document.querySelectorAll(s);
 }
-// keys = questions
-// properties = correct answer, choices array.
-var QnAdata = {
-  '1+1': {
-    correct: '2',
-    choices: ['1', '2', '3'],
-    imageDIR: false,
-    multipleAnswer: false,
-  },
-  '5**2': {
-    correct: '25',
-    choices: ['4', '81', '25'],
-    imageDIR: false,
-    multipleAnswer: false,
-  },
-  '10^3': {
-    correct: '1000',
-    choices: ['10', '100', '1000'],
-    imageDIR: false,
-    multipleAnswer: false,
-  },
-  'Meaning of Life': {
-    correct: '42',
-    choices: ['42', '69', '96'],
-    imageDIR: false,
-    multipleAnswer: false,
-  },
-  'Number of The Answer': {
-    correct: '3',
-    choices: ['3', '23', '8'],
-    imageDIR: false,
-    multipleAnswer: false,
-  },
-  'This image is taken from what monster hunter game': {
-    correct: 'MHP3RD',
-    choices: ['MH', 'MHDOS', 'MHF2', 'MHFU', 'MHP3RD', 'MHTRI', 'MH3U'],
-    imageDIR: `testImages/mhp3rd.jpg`,
-    multipleAnswer: false,
-  },
-  'The image came from one of the games of Capcom? What games are made by Capcom? Check all correct answers': {
-    correct: ['Monster Hunter', 'Megaman', 'Resident Evil', 'Breath of Fire'],
-    choices: [
-      'Megaman',
-      'Onimusha: Warlords',
-      'Resident Evil',
-      'Dauntless',
-      'Monster Hunter',
-      'Dark Souls',
-      'Dragon Quest',
-      'Breath of Fire',
-    ],
-    imageDIR: 'testImages/mhp3rd.jpg',
-    multipleAnswer: true,
-  },
-};
 
 // selected elements
 const questionContainer = getElement('.questions');
@@ -321,7 +263,7 @@ const quit = getElement('.quit');
 const continueButton = getElement('.continue');
 
 // question keys
-var questionsArray = generateQuestions(QnAdata);
+var questionsArray = generateQuestions(testQuestionData);
 // random question keys order
 var randomizedQArray = sortRandom(questionsArray);
 // populated when user submit answers
@@ -332,7 +274,16 @@ var currentMax = 0;
 var progressScale = Math.ceil(100 / randomizedQArray.length);
 var correctAnswers = 0;
 
+// initialize app
 populateQContainer(questionContainer, pagination);
+var finalQuestion = paginationCheck(pagination);
+if (finalQuestion) {
+  determinate.classList.add('red', 'accent-4');
+  determinate.style.width = `${100}%`;
+  submit.classList.toggle('none');
+  next.classList.toggle('none');
+  pulseOnChecked(submit);
+}
 
 // events
 
@@ -388,7 +339,9 @@ quit.addEventListener('click', () => {
   determinate.classList.remove('red', 'accent-4');
   determinate.classList.add('grey');
   questionContainer.innerHTML = `
-    <h1>Final Result: ${calculateResults(correctAnswers)}%</h1>
+    <h1 class='center-align'>Final Result: ${calculateResults(
+      correctAnswers
+    )}%</h1>
   `;
 });
 
