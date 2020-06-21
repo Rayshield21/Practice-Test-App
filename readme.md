@@ -54,15 +54,15 @@ Take note that the file extension in the imageDIR is _.jpg_. Preferably, you bet
 
 Do the same thing and write **`false`** for _multipleAnswer_ if the question doesn't ask for more than one answer.
 
-## OH \$#!+ i think i got rid of something
+## Uh Oh....  I think i got rid of something
 
 ### File Structure
 
 ```
 Practice-Test-App/
 |
-| --image
-|   |--image.jpg
+|--images
+|  |--image.jpg
 |
 |--app.html
 |
@@ -75,6 +75,6 @@ Practice-Test-App/
 |--readme.md
 ```
 
-If you think something is missing in the structure, it's either get the missing here https://github.com/Rayshield21/Practice-Test-App. If the image folder is missing, just add a folder into the project repository.
+If you think something is missing in the structure, Just get the missing here https://github.com/Rayshield21/Practice-Test-App.
 
-If you have very little to no knowledge of programming, I also don't recommend changing the file name of **_sampleData.js_**. Doing so requires you to add more work by having to edit also some part of the html and main javascript code.
+If you have very little to no knowledge of programming, I also don't recommend changing the file name of **_sampleData.js_**. Doing so requires you to add more work by having to edit also some part of the html and main javascript code. The main concept of this web app is that the only part that you need to change is the data in the _data.js_ file.
